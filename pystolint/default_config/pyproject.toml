@@ -1,0 +1,48 @@
+[tool.ruff]
+line-length = 120
+preview = true
+
+[tool.ruff.format]
+quote-style = 'single'
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = 'single'
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint]
+select = [
+    'ERA','FAST','YTT','ANN','ASYNC','S','BLE','FBT','B','A','COM','C4','DTZ','T10','EM','EXE','FIX','FA','INT',
+    'ISC','ICN','LOG','G','INP','PIE','T20','PYI','PT','Q','RSE','RET','SLF','SIM','SLOT','TID','TD','TC','ARG',
+    'PTH','FLY','I','C90','NPY','PD','N','PERF','E','W','DOC','D','F','PGH','PL','UP','FURB','RUF','TRY',
+    'DJ','AIR'
+
+
+]
+ignore = [
+    'D100','D101','D102','D103','D104','D105','D106','D107','D203','D212','COM812','S101','PLW1514','PT012','S607',
+    'S404','S603',
+]
+
+[tool.ruff.lint.per-file-ignores]
+'tests/**/*.py' = [
+    'ARG001', 'INP001','PLR2004','FBT003',
+]
+
+[tool.mypy]
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unused_configs = true
+show_error_codes = true
+ignore_missing_imports = true
+follow_imports = 'silent'
+disallow_untyped_calls = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+check_untyped_defs = true
+strict = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+warn_return_any = true
