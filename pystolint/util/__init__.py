@@ -11,6 +11,8 @@ def execute_command(cmd: list[str]) -> tuple[int, str, str]:
     err = completed_proc.stderr
 
     if code > 1:
+        sys.stderr.write(f'cmd {cmd} failed with: \n')
+        sys.stderr.write(out)
         sys.stderr.write(err)
         sys.exit(code)
 

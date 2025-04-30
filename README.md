@@ -75,6 +75,6 @@ base_branch_name = "develop"
 ```
 
 cli:
-- `--base_toml_path` - path for replace pystolint defaults settings (default is [this](https://github.com/hhru/pystolint/blob/master/pystolint/default_config/pyproject.toml))
+- `--base_toml_path` - path or link for replace pystolint [default settings](https://github.com/hhru/pystolint/blob/master/pystolint/default_config/pyproject.toml)
 - `--base_branch_name` - branch name from which to get diff (default is master)
 - `--config` - specify path to toml configs (default is `pyproject.toml` in current dir)

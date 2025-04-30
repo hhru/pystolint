@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from pystolint.dto.report import Report, ReportItem
 from pystolint.util import execute_command
@@ -23,6 +24,9 @@ def run_mypy_check(
     report = Report(errors=err.splitlines())
     for item in mypy_results:
         filename = item.get('file')
+        if not Path(filename).is_absolute():
+            filename = str(Path.cwd() / filename)
+
         line = int(item.get('line', '0'))
         if diff and (filename not in modified_lines or line not in modified_lines[filename]):
             continue

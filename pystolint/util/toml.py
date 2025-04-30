@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from typing import Union, cast
+from urllib.request import urlopen
 
 try:
     import tomllib  # type: ignore[import-not-found,unused-ignore]
@@ -28,7 +29,7 @@ def deep_merge(base_toml_dict: NestedDict, override_toml_dict: NestedDict) -> No
             base_toml_dict[key] = value
 
 
-def get_base_toml_path(base_toml_path_provided: str | None, local_config: NestedDict) -> str:
+def get_base_config(base_toml_path_provided: str | None, local_config: NestedDict) -> NestedDict:
     tool_settings = local_config.get('tool', {})
     assert isinstance(tool_settings, dict)
     pystolint_settings = tool_settings.get('pystolint', {})
@@ -36,9 +37,16 @@ def get_base_toml_path(base_toml_path_provided: str | None, local_config: Nested
     config_default = pystolint_settings.get('base_toml_path')
     assert config_default is None or isinstance(config_default, str)
 
-    return (
-        base_toml_path_provided or config_default or str(Path(__file__).parent.parent / 'default_config/pyproject.toml')
-    )
+    path_override = base_toml_path_provided or config_default
+    if path_override and path_override.startswith(('http://', 'https://')):
+        with urlopen(path_override) as response:
+            toml_str = response.read().decode('utf-8')
+            base_config: NestedDict = tomllib.loads(toml_str)
+    else:
+        pth = path_override or str(Path(__file__).parent.parent / 'default_config/pyproject.toml')
+        base_config = tomllib.loads(Path(pth).read_text())
+
+    return base_config
 
 
 def get_merged_config(
@@ -46,16 +54,19 @@ def get_merged_config(
 ) -> NestedDict:
     local_toml_path = local_toml_path_provided or 'pyproject.toml'
     local_config = tomllib.loads(Path(local_toml_path).read_text())
-
-    base_toml_path = get_base_toml_path(base_toml_path_provided, local_config)
-    default_config = tomllib.loads(Path(base_toml_path).read_text())
+    base_config = get_base_config(base_toml_path_provided, local_config)
 
     python_target_version: str | None = get_python_min_version(local_config)
     if python_target_version is not None:
-        default_config['tool']['ruff']['target-version'] = 'py' + python_target_version.replace('.', '')
-        default_config['tool']['mypy']['python_version'] = python_target_version
+        assert isinstance(base_config['tool'], dict)
+        if 'ruff' in base_config['tool']:
+            assert isinstance(base_config['tool']['ruff'], dict)
+            base_config['tool']['ruff']['target-version'] = 'py' + python_target_version.replace('.', '')
+        if 'mypy' in base_config['tool']:
+            assert isinstance(base_config['tool']['mypy'], dict)
+            base_config['tool']['mypy']['python_version'] = python_target_version
 
-    merged_config: NestedDict = default_config.copy()
+    merged_config: NestedDict = base_config.copy()
     deep_merge(merged_config, local_config)
 
     return merged_config
@@ -79,7 +90,7 @@ def parse_min_version(version_spec: str) -> str | None:
         if match:
             operator, version = match.groups()
             if operator in {'>=', '~=', '^', ''}:
-                min_versions.append(version)
+                min_versions.append(extract_version_short(version))
             elif operator == '>':
                 # For '>3.8', the minimal is 3.9
                 parts = version.split('.')
@@ -95,6 +106,17 @@ def parse_min_version(version_spec: str) -> str | None:
 
     # Return the most restrictive minimal version
     return max(min_versions, key=lambda v: tuple(map(int, filter(None, v.split('.')))))
+
+
+def extract_version_short(version: str) -> str:
+    if re.fullmatch(r'^\d+\.\d+\.\d+$', version):
+        return version.rsplit('.', 1)[0]
+    if re.fullmatch(r'^\d+\.\d+$', version):
+        return version
+    if re.fullmatch(r'^\d+$', version):
+        return version + '.0'
+    msg = f'unexpected pyhton version {version}'
+    raise RuntimeError(msg)
 
 
 def get_python_min_version(local_config: NestedDict) -> str | None:
