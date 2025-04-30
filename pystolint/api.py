@@ -72,6 +72,7 @@ def check(
 
     with tempfile.NamedTemporaryFile(mode='w', suffix='.toml') as tmp_config:
         mypy_config = merged_config.get('mypy', {})
+        mypy_config = {'tool': {'mypy': mypy_config}}
         assert isinstance(mypy_config, dict)
         toml_str = tomli_w.dumps(mypy_config)
         tmp_config.write(toml_str)
