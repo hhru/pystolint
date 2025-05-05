@@ -18,7 +18,9 @@ I'm fed up with:
 
 ### Simple:
 - `pip install pystolint`
+
 or
+
 - `pip install git+ssh://git@github.com/hhru/pystolint.git`
 
 ### Dev:
