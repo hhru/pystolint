@@ -17,7 +17,7 @@ I'm fed up with:
 ## Install
 
 ### Simple:
-- `pip install pystolint (WIP)`
+- `pip install pystolint`
 or
 - `pip install git+ssh://git@github.com/hhru/pystolint.git`
 
