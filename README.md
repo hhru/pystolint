@@ -1,4 +1,4 @@
-# 🔫 pystolint
+# 🔫 pystolint 🔫
 
 ## Yet another python linter?
 
