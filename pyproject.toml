@@ -8,11 +8,10 @@ dynamic = ['version']
 description = 'Linters composer'
 readme = 'README.md'
 authors = [{ name = 'Leonid Vinogradov', email = 'lugod.a30@gmail.com' }]
-requires-python = '>=3.9,<3.13'
+requires-python = '>=3.12,<3.14'
 dependencies = [
   'mypy == 1.15.0',
   'ruff == 0.11.6',
-  'tomli == 2.2.1; python_version == "3.9"',
   'tomli-w == 1.2.0',
 ]
 

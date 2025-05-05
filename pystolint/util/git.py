@@ -1,9 +1,9 @@
-from __future__ import annotations
-
 import re
 import subprocess
 from collections import defaultdict
 from pathlib import Path
+
+from pystolint.util.toml import NestedDict
 
 default_base_branch_name = 'master'
 
@@ -63,3 +63,12 @@ def get_git_changed_lines(base_branch_name: str = default_base_branch_name) -> d
                 pass
 
     return {k: v for k, v in result.items() if v}
+
+
+def get_base_branch_name(base_branch_name_provided: str | None, merged_config: NestedDict) -> str:
+    pystolint_settings = merged_config.get('pystolint', {})
+    assert isinstance(pystolint_settings, dict)
+    config_default = pystolint_settings.get('base_branch_name')
+    assert config_default is None or isinstance(config_default, str)
+
+    return base_branch_name_provided or config_default or default_base_branch_name
