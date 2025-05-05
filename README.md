@@ -10,7 +10,8 @@ No. It's just runner for [ruff](https://docs.astral.sh/ruff/) + [mypy](https://m
 I'm fed up with:
 1. Having to copy settings for every single project. (at least until "parent pyproject.toml" is not invented)
 2. Not being able to apply checks only to git diffs, which makes it hard to add linters to large projects
-3. (WIP) Not being able to deprecate certain things and preventing them in new code.
+3. Not being able to deprecate certain things and preventing them in new code. 
+    - [Solved for 3.13+](https://mypy.readthedocs.io/en/stable/changelog.html#support-for-deprecated-decorator-pep-702)
 
 
 ## Install
