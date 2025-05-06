@@ -1,3 +1,7 @@
+# 0.1.2
+
+Add 'RSE102','RET505','RET506','RET507','RET508 to ignore
+
 # 0.1.1
 
 Internal bugfixes
