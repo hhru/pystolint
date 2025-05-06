@@ -1,4 +1,9 @@
-from collections.abc import Collection
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Collection
 
 
 class ReportItem:
@@ -17,5 +22,5 @@ class Report:
         self.items: list[ReportItem] = items or []
         self.errors: set[str] = set(errors or ())
 
-    def __add__(self, other: 'Report') -> 'Report':
+    def __add__(self, other: Report) -> Report:
         return Report(items=self.items + other.items, errors=self.errors | other.errors)

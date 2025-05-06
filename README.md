@@ -21,7 +21,7 @@ I'm fed up with:
 
 or
 
-- `pip install git+ssh://git@github.com/hhru/pystolint.git`
+- `pip install git+ssh://git@github.com/hhru/pystolint.git@master`
 
 ### Dev:
 

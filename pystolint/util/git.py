@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import re
 import subprocess
 from collections import defaultdict
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from pystolint.util.toml import NestedDict
+if TYPE_CHECKING:
+    from pystolint.util.toml import NestedDict
 
 default_base_branch_name = 'master'
 
