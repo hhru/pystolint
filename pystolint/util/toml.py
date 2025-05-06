@@ -1,11 +1,19 @@
+from __future__ import annotations
+
 import re
-import tomllib
 from pathlib import Path
 from typing import Union, cast
 from urllib.request import urlopen
 
-NestedValue = Union['NestedDict', 'NestedList', str, int, float, bool, None]
+try:
+    import tomllib  # type: ignore[import-not-found,unused-ignore]
+except ImportError:
+    import tomli as tomli_fallback  # type: ignore[import-not-found,unused-ignore]
 
+    tomllib = tomli_fallback  # type: ignore[no-redef,unused-ignore]
+
+
+NestedValue = Union['NestedDict', 'NestedList', str, int, float, bool, None]
 NestedDict = dict[str, NestedValue]
 NestedList = list[NestedValue]
 py_versions_pattern = re.compile(r'^(>=|~=|>|\^|\s*)([\d.]+)')

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import tempfile
 
 import tomli_w
@@ -9,19 +11,6 @@ from pystolint.ruff.ruff_format import run_ruff_check_fix, run_ruff_format
 from pystolint.util import filter_py_files
 from pystolint.util.git import get_base_branch_name
 from pystolint.util.toml import get_merged_config
-
-
-# no need to use in python 3.13+
-# https://mypy.readthedocs.io/en/stable/changelog.html#support-for-deprecated-decorator-pep-702
-class Deprecated:
-    def __init__(self, func) -> None:  # type: ignore[no-untyped-def]  # noqa: ANN001
-        self.func = func
-
-    def __call__(self, *args, **kwargs):  # type: ignore[no-untyped-def] # noqa: ANN204,ANN002,ANN003
-        return self.func(*args, **kwargs)
-
-    def __get__(self, instance, owner=None):  # type: ignore[no-untyped-def] # noqa: ANN204,ANN001
-        return lambda *args, **kwargs: self(instance, *args, **kwargs)  # type: ignore[deprecated]
 
 
 def reformat(
