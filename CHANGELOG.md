@@ -1,3 +1,7 @@
+# 0.1.3
+
+Add `__main__.py` file
+
 # 0.1.2
 
 Add 'RSE102','RET505','RET506','RET507','RET508 to ignore
