@@ -2,7 +2,7 @@
 
 ## Yet another python linter?
 
-No. It's just runner for [ruff](https://docs.astral.sh/ruff/) + [mypy](https://mypy.readthedocs.io/en/stable/) with [this](https://github.com/hhru/pystolint/blob/master/pystolint/default_config/pyproject.toml) settings
+No. It's just a runner for [ruff](https://docs.astral.sh/ruff/) + [mypy](https://mypy.readthedocs.io/en/stable/) with [these](https://github.com/hhru/pystolint/blob/master/pystolint/default_config/pyproject.toml) settings
 
 
 ## Why?
