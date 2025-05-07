@@ -7,7 +7,7 @@ from pystolint.api import check
 
 
 def test_codestyle(pytestconfig: Config) -> None:
-    result = check(['.'])
+    result = check(['.'], local_toml_path_provided=f'{ROOT}/pyproject.toml')
     if pytestconfig.getoption('--github-actions'):
         for item in result.items:
             file_name = item.file_path.removeprefix(str(ROOT) + '/')
