@@ -70,39 +70,43 @@ def process_paths(paths: list[str], *, base_branch_name_provided: str | None = N
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument('mode', choices=['check', 'format'], help='must be either check or format', type=str)
-    parser.add_argument('paths', nargs='*', help='paths to execute checks on', type=str)
-    parser.add_argument('--diff', action='store_true', help='check only "git modified" files')
-    parser.add_argument('--config', help='path to a TOML configuration file', default=None)
-    parser.add_argument('--base_branch_name', help='base branch name for --diff mode (default master)', default=None)
-    parser.add_argument(
-        '--base_toml_path',
-        help='path to a base TOML configuration file, if you want replace pystolint defaults',
-        default=None,
-    )
-    args = parser.parse_args()
-    base_branch_name_provided = args.base_branch_name
-    base_toml_path_provided = args.base_toml_path
-    local_toml_path_provided = args.config
-
-    paths = process_paths(args.paths, base_branch_name_provided=base_branch_name_provided, diff=args.diff)
-    if len(paths) == 0:
-        sys.stderr.write('No paths provided')
-        sys.exit(2)
-
-    if args.mode == 'check':
-        check_with_stdout(
-            paths,
-            base_branch_name_provided=base_branch_name_provided,
-            diff=args.diff,
-            local_toml_path_provided=local_toml_path_provided,
-            base_toml_path_provided=base_toml_path_provided,
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument('mode', choices=['check', 'format'], help='must be either check or format', type=str)
+        parser.add_argument('paths', nargs='*', help='paths to execute checks on', type=str)
+        parser.add_argument('--diff', action='store_true', help='check only "git modified" files')
+        parser.add_argument('--config', help='path to a TOML configuration file', default=None)
+        parser.add_argument('--base_branch_name', help='base branch name for --diff mode (default master)', default=None)
+        parser.add_argument(
+            '--base_toml_path',
+            help='path to a base TOML configuration file, if you want replace pystolint defaults',
+            default=None,
         )
-    elif args.mode == 'format':
-        format_with_stdout(
-            paths, local_toml_path_provided=local_toml_path_provided, base_toml_path_provided=base_toml_path_provided
-        )
+        args = parser.parse_args()
+        base_branch_name_provided = args.base_branch_name
+        base_toml_path_provided = args.base_toml_path
+        local_toml_path_provided = args.config
+
+        paths = process_paths(args.paths, base_branch_name_provided=base_branch_name_provided, diff=args.diff)
+        if len(paths) == 0:
+            sys.stderr.write('No paths provided')
+            sys.exit(2)
+
+        if args.mode == 'check':
+            check_with_stdout(
+                paths,
+                base_branch_name_provided=base_branch_name_provided,
+                diff=args.diff,
+                local_toml_path_provided=local_toml_path_provided,
+                base_toml_path_provided=base_toml_path_provided,
+            )
+        elif args.mode == 'format':
+            format_with_stdout(
+                paths, local_toml_path_provided=local_toml_path_provided, base_toml_path_provided=base_toml_path_provided
+            )
+    except Exception as ex:
+        sys.stderr.write(f'jesko padaem --- {type(ex)} --- {ex}')
+        raise
 
 
 if __name__ == '__main__':
