@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from pystolint.api import check, reformat
 from pystolint.util.git import default_base_branch_name, get_git_changed_files
+from pystolint.util.toml import dump_merged_config
 
 if TYPE_CHECKING:
     from pystolint.dto.report import Report
@@ -71,27 +72,63 @@ def process_paths(paths: list[str], *, base_branch_name_provided: str | None = N
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument('mode', choices=['check', 'format'], help='must be either check or format', type=str)
-    parser.add_argument('paths', nargs='*', help='paths to execute checks on', type=str)
-    parser.add_argument('--diff', action='store_true', help='check only "git modified" files')
-    parser.add_argument('--config', help='path to a TOML configuration file', default=None)
-    parser.add_argument('--base_branch_name', help='base branch name for --diff mode (default master)', default=None)
+
+    # Modes
+    subparsers = parser.add_subparsers(dest='mode', help='Available modes', required=False)
+    check_parser = subparsers.add_parser('check', help='Check files')
+    format_parser = subparsers.add_parser('format', help='Format files')
     parser.add_argument(
-        '--base_toml_path',
-        help='path to a base TOML configuration file, if you want replace pystolint defaults',
+        '--generate-config',
+        metavar='PATH',
+        dest='generate_config',
+        help='Generate merged configs at specified path prefix',
         default=None,
     )
-    args = parser.parse_args()
-    base_branch_name_provided = args.base_branch_name
-    base_toml_path_provided = args.base_toml_path
-    local_toml_path_provided = args.config
 
-    paths = process_paths(args.paths, base_branch_name_provided=base_branch_name_provided, diff=args.diff)
+    # Check mode
+    check_parser.add_argument('paths', nargs='*', help='Paths to check')
+    check_parser.add_argument('--diff', action='store_true', help='Check only modified files')
+    check_parser.add_argument('--base_branch_name', help='Base branch for --diff', default=None)
+
+    # Format mode
+    format_parser.add_argument('paths', nargs='*', help='Paths to format')
+
+    # Common settings
+    parser.add_argument('--config', help='Path to local project TOML config', default=None)
+    parser.add_argument('--base_toml_path', help='Path to base TOML config', default=None)
+
+    try:
+        args = parser.parse_args()
+    except argparse.ArgumentError as e:
+        parser.error(str(e))
+
+    if args.generate_config and args.mode:
+        parser.error('Cannot combine --generate-config with check/format')
+
+    if not args.generate_config and not args.mode:
+        parser.error('Must specify a mode check/format/--generate-config')
+
+    local_toml_path_provided = args.config
+    base_toml_path_provided = args.base_toml_path
+
+    if args.generate_config:
+        dump_merged_config(local_toml_path_provided, base_toml_path_provided, args.generate_config)
+        sys.stdout.write('Configs generated\n')
+        return
+
+    diff = getattr(args, 'diff', False)
+    base_branch_name_provided = args.base_branch_name if diff else None
+    paths = process_paths(args.paths, base_branch_name_provided=base_branch_name_provided, diff=diff)
     if len(paths) == 0:
-        sys.stderr.write('No paths provided')
+        sys.stderr.write('No paths provided\n')
         sys.exit(2)
 
-    if args.mode == 'check':
+    if args.mode == 'format':
+        format_with_stdout(
+            paths, local_toml_path_provided=local_toml_path_provided, base_toml_path_provided=base_toml_path_provided
+        )
+
+    elif args.mode == 'check':
         check_with_stdout(
             paths,
             base_branch_name_provided=base_branch_name_provided,
@@ -99,10 +136,9 @@ def main() -> None:
             local_toml_path_provided=local_toml_path_provided,
             base_toml_path_provided=base_toml_path_provided,
         )
-    elif args.mode == 'format':
-        format_with_stdout(
-            paths, local_toml_path_provided=local_toml_path_provided, base_toml_path_provided=base_toml_path_provided
-        )
+    else:
+        sys.stderr.write(f'Unexpected command args {sys.argv}\n')
+        sys.exit(2)
 
 
 if __name__ == '__main__':

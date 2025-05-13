@@ -68,7 +68,7 @@ pys format path1 path2
 
 ## Settings
 
-can be specified from cli or pyproject.toml. cli settings have bigger priority
+Can be specified from cli or pyproject.toml. Cli settings have bigger priority
 
 example toml:
 ```toml
@@ -80,4 +80,4 @@ base_branch_name = "develop"
 cli:
 - `--base_toml_path` - path or link for replace pystolint [default settings](https://github.com/hhru/pystolint/blob/master/pystolint/default_config/pyproject.toml)
 - `--base_branch_name` - branch name from which to get diff (default is master)
-- `--config` - specify path to toml configs (default is `pyproject.toml` in current dir)
+- `--config` - specify path to local toml configs (default is `pyproject.toml` in current dir)

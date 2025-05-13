@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Union, cast
 from urllib.request import urlopen
 
+import tomli_w
+
 try:
     import tomllib  # type: ignore[import-not-found,unused-ignore]
 except ImportError:
@@ -70,6 +72,24 @@ def get_merged_config(
     deep_merge(merged_config, local_config)
 
     return merged_config
+
+
+def dump_merged_config(
+    local_toml_path_provided: str | None, base_toml_path_provided: str | None, dest_path: str
+) -> None:
+    dest_path = dest_path.removesuffix('.toml')
+    merged_config = get_merged_config(local_toml_path_provided, base_toml_path_provided).get('tool', {})
+    assert isinstance(merged_config, dict)
+
+    ruff_config = merged_config.get('ruff', {})
+    assert isinstance(ruff_config, dict)
+    with Path(dest_path + '.ruff.toml').open('wb') as f:
+        tomli_w.dump(ruff_config, f)
+
+    mypy_config = merged_config.get('mypy', {})
+    mypy_config = {'tool': {'mypy': mypy_config}}
+    with Path(dest_path + '.mypy.toml').open('wb') as f:
+        tomli_w.dump(mypy_config, f)
 
 
 def parse_min_version(version_spec: str) -> str | None:
