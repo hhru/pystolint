@@ -1,3 +1,7 @@
+# 0.2.1
+
+Bugfixes
+
 # 0.2.0
 
 Added command `pys --generate-config='qqq'`. Creates merged configs `qqq.ruff.toml` and `qqq.mypy.toml` for debug purpose

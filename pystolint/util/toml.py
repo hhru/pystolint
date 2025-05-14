@@ -51,6 +51,28 @@ def get_base_config(base_toml_path_provided: str | None, local_config: NestedDic
     return base_config
 
 
+def ensure_ruff_extend_is_absolute(merged_config: NestedDict, local_toml_path: str) -> None:
+    tool = merged_config.get('tool')
+    if not isinstance(tool, dict):
+        return
+
+    ruff_settings = tool.get('ruff')
+    if not isinstance(ruff_settings, dict):
+        return
+
+    extend_config_path = ruff_settings.get('extend')
+    if extend_config_path is None:
+        return
+
+    assert isinstance(extend_config_path, str)
+    if not Path(extend_config_path).is_absolute():
+        extend_config_path = str(Path(local_toml_path).parent.resolve() / extend_config_path)
+
+    assert isinstance(merged_config['tool'], dict)
+    assert isinstance(merged_config['tool']['ruff'], dict)
+    merged_config['tool']['ruff']['extend'] = extend_config_path
+
+
 def get_merged_config(
     local_toml_path_provided: str | None = None, base_toml_path_provided: str | None = None
 ) -> NestedDict:
@@ -71,6 +93,7 @@ def get_merged_config(
     merged_config: NestedDict = base_config.copy()
     deep_merge(merged_config, local_config)
 
+    ensure_ruff_extend_is_absolute(merged_config, local_toml_path)
     return merged_config
 
 
