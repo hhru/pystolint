@@ -71,6 +71,8 @@ def ensure_ruff_extend_is_absolute(merged_config: NestedDict, local_toml_path: s
     assert isinstance(merged_config['tool'], dict)
     assert isinstance(merged_config['tool']['ruff'], dict)
     merged_config['tool']['ruff']['extend'] = extend_config_path
+    if not Path(extend_config_path).is_file():
+        merged_config['tool']['ruff'].pop('extend')
 
 
 def get_merged_config(
