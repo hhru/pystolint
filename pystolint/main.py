@@ -118,9 +118,11 @@ def main() -> None:
 
     diff = getattr(args, 'diff', False)
     base_branch_name_provided = args.base_branch_name if diff else None
+    sys.stdout.write(f'PARAMY: paths - {args.paths}; diff - {diff}\n')
+    sys.stderr.write(f'PARAMY: paths - {args.paths}; diff - {diff}\n')
     paths = process_paths(args.paths, base_branch_name_provided=base_branch_name_provided, diff=diff)
     if len(paths) == 0:
-        sys.stderr.write('No paths provided\n')
+        sys.stderr.write(f'No paths provided got - {sys.argv}; paths - {args.paths}; diff - {diff}\n')
         sys.exit(2)
 
     if args.mode == 'format':
