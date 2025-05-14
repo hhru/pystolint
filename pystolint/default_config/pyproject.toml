@@ -12,17 +12,10 @@ inline-quotes = 'single'
 max-complexity = 15
 
 [tool.ruff.lint]
-select = [
-    'ERA','FAST','YTT','ANN','ASYNC','S','BLE','FBT','B','A','COM','C4','DTZ','T10','EM','EXE','FIX','FA','INT',
-    'ISC','ICN','LOG','G','INP','PIE','T20','PYI','PT','Q','RSE','RET','SLF','SIM','SLOT','TID','TD','TC','ARG',
-    'PTH','FLY','I','C90','NPY','PD','N','PERF','E','W','DOC','D','F','PGH','PL','UP','FURB','RUF','TRY',
-    'DJ','AIR'
-
-
-]
+select = ['ALL']
 ignore = [
     'D100','D101','D102','D103','D104','D105','D106','D107','D203','D212','COM812','S101','PLW1514','PT012','S607',
-    'S404','S603','S310','B008','RSE102','RET505','RET506','RET507','RET508'
+    'S404','S603','S310','B008','RSE102','RET504','RET505','RET506','RET507','RET508','CPY','RUF001'
 ]
 
 [tool.ruff.lint.per-file-ignores]
