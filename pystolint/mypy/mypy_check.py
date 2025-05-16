@@ -29,7 +29,8 @@ def run_mypy_check(
         if diff and (filename not in modified_lines or line not in modified_lines[filename]):
             continue
         column = int(item.get('column', '0'))
-        message = item.get('message')
+        rule_code = item.get('code') or ''
+        message = item.get('message') + (f' [{rule_code}]' if rule_code else '')
         report.items.append(ReportItem(filename, line, column, message))
 
     return report
