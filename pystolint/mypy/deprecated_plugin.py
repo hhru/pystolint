@@ -32,5 +32,5 @@ class DeprecatedCheckerPlugin(Plugin):
         return ctx.default_return_type
 
 
-def plugin(version: str) -> type[DeprecatedCheckerPlugin]:  # noqa: ARG001
+def plugin(version: str) -> type[DeprecatedCheckerPlugin]:
     return DeprecatedCheckerPlugin
