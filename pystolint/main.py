@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from pystolint.api import check, reformat
 from pystolint.util.git import default_base_branch_name, get_git_changed_files
 from pystolint.util.toml import dump_merged_config
+from pystolint.version import version
 
 if TYPE_CHECKING:
     from pystolint.dto.report import Report
@@ -72,6 +73,7 @@ def process_paths(paths: list[str], *, base_branch_name_provided: str | None = N
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version=f'%(prog)s {version}')
 
     # Modes
     subparsers = parser.add_subparsers(dest='mode', help='Available modes', required=False)
