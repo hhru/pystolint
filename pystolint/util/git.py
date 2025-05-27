@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pystolint.util.toml import NestedDict
 
-default_base_branch_name = 'master'
+default_base_branch_name = 'origin/master'
 
 
 def get_git_changed_files(base_branch_name: str = default_base_branch_name) -> tuple[list[str], list[str]]:
