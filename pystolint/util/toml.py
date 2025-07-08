@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from typing import Union, cast
 from urllib.request import urlopen
 
 import tomli_w
+from poetry.core.constraints.version.exceptions import ParseConstraintError
+from poetry.core.constraints.version.parser import parse_constraint
+from poetry.core.constraints.version.version_range_constraint import VersionRangeConstraint
 
 try:
     import tomllib  # type: ignore[import-not-found,unused-ignore]
@@ -18,7 +20,6 @@ except ImportError:
 NestedValue = Union['NestedDict', 'NestedList', str, int, float, bool, None]
 NestedDict = dict[str, NestedValue]
 NestedList = list[NestedValue]
-py_versions_pattern = re.compile(r'^(>=|~=|>|\^|\s*)([\d.]+)')
 
 
 def deep_merge(base_toml_dict: NestedDict, override_toml_dict: NestedDict) -> None:
@@ -118,50 +119,26 @@ def dump_merged_config(
 
 
 def parse_min_version(version_spec: str) -> str | None:
-    """
-    Extract the minimal Python version from a version specifier.
-
-    Returns:
-        Optional[str] version in MAJOR.MINOR format
-
-    """
-    # Remove spaces and split on commas to handle multiple constraints
-    constraints = version_spec.replace(' ', '').split(',')
-
-    min_versions = []
-    for constraint in constraints:
-        # Match version numbers with different operators
-        match = re.match(py_versions_pattern, constraint)
-        if match:
-            operator, version = match.groups()
-            if operator in {'>=', '~=', '^', ''}:
-                min_versions.append(extract_version_short(version))
-            elif operator == '>':
-                # For '>3.8', the minimal is 3.9
-                parts = version.split('.')
-                if len(parts) == 1:
-                    # Handle cases like '>3'
-                    min_versions.append(parts[0] + '.0')
-                else:
-                    # Handle cases like '>3.8'
-                    min_versions.append(f'{parts[0]}.{int(parts[1]) + 1}')
-
-    if not min_versions:
+    try:
+        constraint = parse_constraint(version_spec)
+    except ParseConstraintError:
         return None
 
-    # Return the most restrictive minimal version
-    return max(min_versions, key=lambda v: tuple(map(int, filter(None, v.split('.')))))
+    if not isinstance(constraint, VersionRangeConstraint):
+        return None
 
+    allowed_min = constraint.allowed_min
+    if allowed_min is None:
+        return None
 
-def extract_version_short(version: str) -> str:
-    if re.fullmatch(r'^\d+\.\d+\.\d+$', version):
-        return version.rsplit('.', 1)[0]
-    if re.fullmatch(r'^\d+\.\d+$', version):
-        return version
-    if re.fullmatch(r'^\d+$', version):
-        return version + '.0'
-    msg = f'unexpected pyhton version {version}'
-    raise RuntimeError(msg)
+    if allowed_min.minor and constraint.include_min:
+        minor = allowed_min.minor
+    elif allowed_min.minor and not constraint.include_min:
+        minor = allowed_min.minor + 1
+    else:
+        minor = 0
+
+    return f'{allowed_min.major}.{minor}'
 
 
 def get_python_min_version(local_config: NestedDict) -> str | None:
@@ -182,14 +159,8 @@ def get_python_min_version(local_config: NestedDict) -> str | None:
     ):
         version_spec = local_config['project']['requires-python']
 
-    if not version_spec:
+    if version_spec is None:
         return None
 
     assert isinstance(version_spec, str)
-    result = parse_min_version(version_spec)
-    if result is None:
-        return None
-
-    result = result.rstrip('.')
-    assert re.match(r'^\d+\.\d+$', result), f'Version {result} does not match format MAJOR.MINOR'
-    return result
+    return parse_min_version(version_spec)
