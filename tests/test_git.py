@@ -53,12 +53,12 @@ def test_get_git_changed_files_modified(git_repo: Path) -> None:
     (git_repo / 'untracked.py').write_text("print('untracked')\n")
 
     # Test with new_files_separated=True
-    changed, untracked = get_git_changed_files()
+    changed, untracked = get_git_changed_files(base_branch_name='master')
     assert set(changed) == {str(git_repo / 'initial.py'), str(git_repo / 'new_tracked.py')}
     assert set(untracked) == {str(git_repo / 'untracked.py')}
 
     # Test with new_files_separated=False
-    changed_files, untracked_files = get_git_changed_files()
+    changed_files, untracked_files = get_git_changed_files(base_branch_name='master')
     all_changes = changed_files + untracked_files
     assert set(all_changes) == {
         str(git_repo / 'initial.py'),
@@ -82,7 +82,7 @@ def test_get_git_changed_lines(git_repo: Path) -> None:
     # Create new file
     (git_repo / 'new_file.py').write_text("print('new')\n")
 
-    changed_lines = get_git_changed_lines()
+    changed_lines = get_git_changed_lines(base_branch_name='master')
 
     # Check modified file
     multi_line_path = str(git_repo / 'multi_line.py')
