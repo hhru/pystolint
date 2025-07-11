@@ -7,19 +7,29 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pystolint.api import check, reformat
+from pystolint.tools import CHECK_TOOLS, FORMAT_TOOLS, Tool
 from pystolint.util.git import default_base_branch_name, get_git_changed_files
 from pystolint.util.toml import dump_merged_config
 from pystolint.version import version
 
 if TYPE_CHECKING:
+    from collections.abc import Collection
+
     from pystolint.dto.report import Report
 
 
 def format_with_stdout(
-    paths: list[str], *, local_toml_path_provided: str | None = None, base_toml_path_provided: str | None = None
+    paths: list[str],
+    *,
+    local_toml_path_provided: str | None = None,
+    base_toml_path_provided: str | None = None,
+    tools: Collection[Tool] | None = None,
 ) -> None:
     out = reformat(
-        paths, local_toml_path_provided=local_toml_path_provided, base_toml_path_provided=base_toml_path_provided
+        paths,
+        local_toml_path_provided=local_toml_path_provided,
+        base_toml_path_provided=base_toml_path_provided,
+        tools=tools,
     )
     sys.stdout.write(out)
 
@@ -31,6 +41,7 @@ def check_with_stdout(
     diff: bool = False,
     local_toml_path_provided: str | None = None,
     base_toml_path_provided: str | None = None,
+    tools: Collection[Tool] | None = None,
 ) -> None:
     report: Report = check(
         paths,
@@ -38,6 +49,7 @@ def check_with_stdout(
         diff=diff,
         local_toml_path_provided=local_toml_path_provided,
         base_toml_path_provided=base_toml_path_provided,
+        tools=tools,
     )
 
     for item in report.items:
@@ -91,9 +103,21 @@ def main() -> None:
     check_parser.add_argument('paths', nargs='*', help='Paths to check')
     check_parser.add_argument('--diff', action='store_true', help='Check only modified files')
     check_parser.add_argument('--base_branch_name', help='Base branch for --diff', default=None)
+    check_parser.add_argument(
+        '--tool',
+        action='append',
+        choices=[tool.value for tool in CHECK_TOOLS],
+        help='Specific tool to run (can be specified multiple times)',
+    )
 
     # Format mode
     format_parser.add_argument('paths', nargs='*', help='Paths to format')
+    format_parser.add_argument(
+        '--tool',
+        action='append',
+        choices=[tool.value for tool in FORMAT_TOOLS],
+        help='Specific tool to run (can be specified multiple times)',
+    )
 
     # Common settings
     parser.add_argument('--config', help='Path to local project TOML config', default=None)
@@ -125,9 +149,15 @@ def main() -> None:
         sys.stderr.write('No paths provided\n')
         sys.exit(2)
 
+    tools_arg = getattr(args, 'tool', None)
+    tools = [Tool(tool) for tool in tools_arg] if tools_arg else None
+
     if args.mode == 'format':
         format_with_stdout(
-            paths, local_toml_path_provided=local_toml_path_provided, base_toml_path_provided=base_toml_path_provided
+            paths,
+            local_toml_path_provided=local_toml_path_provided,
+            base_toml_path_provided=base_toml_path_provided,
+            tools=tools,
         )
 
     elif args.mode == 'check':
@@ -137,6 +167,7 @@ def main() -> None:
             diff=args.diff,
             local_toml_path_provided=local_toml_path_provided,
             base_toml_path_provided=base_toml_path_provided,
+            tools=tools,
         )
     else:
         sys.stderr.write(f'Unexpected command args {sys.argv}\n')

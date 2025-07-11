@@ -18,6 +18,7 @@ def test_main_check_mode() -> None:
             diff=False,
             local_toml_path_provided=None,
             base_toml_path_provided=None,
+            tools=None,
         )
 
 
@@ -29,7 +30,7 @@ def test_main_format_mode() -> None:
     ):
         main()
         mock_format.assert_called_once_with(
-            ['/some_file.py'], local_toml_path_provided=None, base_toml_path_provided=None
+            ['/some_file.py'], local_toml_path_provided=None, base_toml_path_provided=None, tools=None
         )
 
 
@@ -48,6 +49,7 @@ def test_main_with_diff_flag() -> None:
             diff=True,
             local_toml_path_provided=None,
             base_toml_path_provided=None,
+            tools=None,
         )
 
 
@@ -107,3 +109,31 @@ def test_main_fails_with_paths_and_diff() -> None:
         main()
         assert stderr.getvalue() == 'Error: Diff mode does not accept file paths\n'
         assert exc_info.value.code == 1
+
+
+def test_main_check_mode_with_tools() -> None:
+    with (
+        patch('sys.argv', ['pystolint', 'check', '/some_file.py', '--tool', 'mypy', '--tool', 'ruff']),
+        patch('pystolint.main.check_with_stdout') as mock_check,
+    ):
+        main()
+        mock_check.assert_called_once_with(
+            ['/some_file.py'],
+            base_branch_name_provided=None,
+            diff=False,
+            local_toml_path_provided=None,
+            base_toml_path_provided=None,
+            tools=['mypy', 'ruff'],
+        )
+
+
+def test_main_format_mode_with_tools() -> None:
+    with (
+        patch('sys.argv', ['pystolint', 'format', '/some_file.py', '--tool', 'ruff']),
+        patch('pystolint.main.format_with_stdout') as mock_format,
+        patch('sys.stdout', new=StringIO()),
+    ):
+        main()
+        mock_format.assert_called_once_with(
+            ['/some_file.py'], local_toml_path_provided=None, base_toml_path_provided=None, tools=['ruff']
+        )
