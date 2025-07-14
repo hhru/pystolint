@@ -1,3 +1,7 @@
+# 0.2.15
+
+Added optional argument `--tool {ruff, mypy}` to select which tool to run.
+
 # 0.2.14
 
 Bugfixes
