@@ -1,3 +1,7 @@
+# 0.2.16
+
+Added mypy `report_deprecated_as_note` option support for deprecated plugin
+
 # 0.2.15
 
 Added optional argument `--tool {ruff, mypy}` to select which tool to run.
