@@ -28,7 +28,8 @@ class DeprecatedCheckerPlugin(Plugin):
 
     @staticmethod
     def _handle_deprecated_call(ctx: MethodContext | FunctionContext) -> Type:
-        ctx.api.fail('Call to deprecated function', ctx.context, code=errorcodes.DEPRECATED)
+        warn = ctx.api.msg.note if ctx.api.options.report_deprecated_as_note else ctx.api.msg.fail
+        warn('Call to deprecated function', ctx.context, code=errorcodes.DEPRECATED)
         return ctx.default_return_type
 
 
