@@ -1,3 +1,7 @@
+# 0.2.17
+
+Remove python < 3.14 from pyproject
+
 # 0.2.16
 
 Added mypy `report_deprecated_as_note` option support for deprecated plugin
