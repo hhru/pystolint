@@ -1,3 +1,7 @@
+# 0.2.18
+
+Add TRY003, EM102 to ignores
+
 # 0.2.17
 
 Remove python < 3.14 from pyproject
