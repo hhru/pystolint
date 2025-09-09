@@ -1,5 +1,9 @@
 # 0.2.18
 
+Add FBT001, FBT002 to ignores
+
+# 0.2.18
+
 Add TRY003, EM102 to ignores
 
 # 0.2.17
