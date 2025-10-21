@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -35,3 +36,15 @@ def filter_py_files(paths: list[str]) -> list[str]:
                 py_files.append(path)
 
     return py_files
+
+
+def filter_excluded(file_paths: list[str], excluded_patterns: list[str]) -> list[str]:
+    # Filter out files excluded by config (important for --diff)
+
+    # Mypy and Ruff use fullmatch-like regexes
+    regexes = [re.compile(p) for p in excluded_patterns]
+
+    def is_excluded(path: str) -> bool:
+        return any(r.search(path) for r in regexes)
+
+    return [p for p in file_paths if not is_excluded(p)]
