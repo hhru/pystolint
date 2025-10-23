@@ -1,7 +1,8 @@
 # 0.3.0
 
-`--diff` mode now considers excluded files
-Default ruff config now ignores ANN* errors
+* `--diff` mode now considers excluded files
+* Default ruff config now ignores ANN* errors
+* Default ruff config now ignores PLR0914 (too many local variables)
 
 # 0.2.19
 
