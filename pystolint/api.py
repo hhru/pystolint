@@ -10,8 +10,8 @@ from pystolint.mypy.mypy_check import run_mypy_check
 from pystolint.ruff.ruff_check import run_ruff_check, run_ruff_format_check
 from pystolint.ruff.ruff_format import run_ruff_check_fix, run_ruff_format
 from pystolint.tools import Mode, Tool, get_available_tools
-from pystolint.util import filter_excluded, filter_py_files
 from pystolint.util.git import get_base_branch_name
+from pystolint.util.paths import filter_excluded, filter_py_files
 from pystolint.util.toml import get_merged_config
 
 if TYPE_CHECKING:
