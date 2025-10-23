@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import tempfile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import tomli_w
 
@@ -10,8 +10,8 @@ from pystolint.mypy.mypy_check import run_mypy_check
 from pystolint.ruff.ruff_check import run_ruff_check, run_ruff_format_check
 from pystolint.ruff.ruff_format import run_ruff_check_fix, run_ruff_format
 from pystolint.tools import Mode, Tool, get_available_tools
-from pystolint.util import filter_py_files
 from pystolint.util.git import get_base_branch_name
+from pystolint.util.paths import filter_excluded, filter_py_files
 from pystolint.util.toml import get_merged_config
 
 if TYPE_CHECKING:
@@ -64,27 +64,35 @@ def check(
         return report
 
     if Tool.RUFF in tools:
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.toml') as tmp_config:
-            ruff_config = merged_config.get('ruff', {})
-            assert isinstance(ruff_config, dict)
-            toml_str = tomli_w.dumps(ruff_config)
-            tmp_config.write(toml_str)
-            tmp_config.flush()
-            tmp_config_path = tmp_config.name
+        ruff_config = merged_config.get('ruff', {})
+        assert isinstance(ruff_config, dict)
+        ruff_excluded = cast('list[str]', ruff_config.get('exclude', []))
+        assert isinstance(ruff_excluded, list)
+        ruff_paths = filter_excluded(filtered_paths, ruff_excluded) if diff else filtered_paths
+        if len(ruff_paths) > 0:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.toml') as tmp_config:
+                toml_str = tomli_w.dumps(ruff_config)
+                tmp_config.write(toml_str)
+                tmp_config.flush()
+                tmp_config_path = tmp_config.name
 
-            report += run_ruff_check(tmp_config_path, filtered_paths, base_branch_name=base_branch_name, diff=diff)
-            report += run_ruff_format_check(tmp_config_path, filtered_paths)
+                report += run_ruff_check(tmp_config_path, ruff_paths, base_branch_name=base_branch_name, diff=diff)
+                report += run_ruff_format_check(tmp_config_path, ruff_paths)
 
     if Tool.MYPY in tools:
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.toml') as tmp_config:
-            mypy_config = merged_config.get('mypy', {})
-            mypy_config = {'tool': {'mypy': mypy_config}}
-            assert isinstance(mypy_config, dict)
-            toml_str = tomli_w.dumps(mypy_config)
-            tmp_config.write(toml_str)
-            tmp_config.flush()
-            tmp_config_path = tmp_config.name
+        mypy_config = merged_config.get('mypy', {})
+        assert isinstance(mypy_config, dict)
+        mypy_excluded = cast('list[str]', mypy_config.get('exclude', []))
+        assert isinstance(mypy_excluded, list)
+        mypy_paths = filter_excluded(filtered_paths, mypy_excluded) if diff else filtered_paths
 
-            report += run_mypy_check(tmp_config_path, filtered_paths, base_branch_name=base_branch_name, diff=diff)
+        if len(mypy_paths) > 0:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.toml') as tmp_config:
+                toml_str = tomli_w.dumps({'tool': {'mypy': mypy_config}})
+                tmp_config.write(toml_str)
+                tmp_config.flush()
+                tmp_config_path = tmp_config.name
+
+                report += run_mypy_check(tmp_config_path, mypy_paths, base_branch_name=base_branch_name, diff=diff)
 
     return report
