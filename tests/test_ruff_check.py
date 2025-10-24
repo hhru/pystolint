@@ -63,7 +63,7 @@ def test_run_ruff_check_lint_errors(file_with_lint_errors: str, ruff_config: str
     assert len(result.items) > 0
 
     # Convert results to a list of (code, message) tuples for easier testing
-    error_codes = {result.message.split(':')[0] for result in result.items}
+    error_codes = {item.code for item in result.items}
 
     # Should find undefined name 'y'
     assert 'F821' in error_codes
@@ -101,7 +101,7 @@ def test_run_ruff_check_multiple_files(ruff_config: str) -> None:
         result = run_ruff_check(ruff_config, [str(clean_file), str(error_file)])
         assert len(result.items) == 1
         assert result.items[0].file_path.endswith(str(error_file))
-        assert 'F821' in result.items[0].message  # undefined name error
+        assert result.items[0].code == 'F821'  # undefined name error
 
 
 def test_run_ruff_check_with_diff_mode(ruff_config: str, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -119,4 +119,4 @@ def test_run_ruff_check_with_diff_mode(ruff_config: str, monkeypatch: pytest.Mon
         result = run_ruff_check(ruff_config, [str(file_path)], diff=True)
         assert len(result.items) == 1
         assert result.items[0].line == 2  # Error on line 2
-        assert 'F821' in result.items[0].message  # undefined name error
+        assert result.items[0].code == 'F821'  # undefined name error

@@ -19,6 +19,24 @@ def test_main_check_mode() -> None:
             local_toml_path_provided=None,
             base_toml_path_provided=None,
             tools=None,
+            quiet=False,
+        )
+
+
+def test_main_check_quiet_mode() -> None:
+    with (
+        patch('sys.argv', ['pystolint', 'check', '/some_file.py', '--quiet']),
+        patch('pystolint.main.check_with_stdout') as mock_check,
+    ):
+        main()
+        mock_check.assert_called_once_with(
+            ['/some_file.py'],
+            base_branch_name_provided=None,
+            diff=False,
+            local_toml_path_provided=None,
+            base_toml_path_provided=None,
+            tools=None,
+            quiet=True,
         )
 
 
@@ -50,6 +68,7 @@ def test_main_with_diff_flag() -> None:
             local_toml_path_provided=None,
             base_toml_path_provided=None,
             tools=None,
+            quiet=False,
         )
 
 
@@ -124,6 +143,7 @@ def test_main_check_mode_with_tools() -> None:
             local_toml_path_provided=None,
             base_toml_path_provided=None,
             tools=['mypy', 'ruff'],
+            quiet=False,
         )
 
 
