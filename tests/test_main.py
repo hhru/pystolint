@@ -3,7 +3,9 @@ from unittest.mock import patch
 
 import pytest
 
-from pystolint.main import main, process_paths
+from pystolint.dto.report import Report, ReportItem, Severity
+from pystolint.main import check_with_stdout, main, process_paths
+from pystolint.tools import Tool
 
 
 def test_main_check_mode() -> None:
@@ -19,6 +21,24 @@ def test_main_check_mode() -> None:
             local_toml_path_provided=None,
             base_toml_path_provided=None,
             tools=None,
+            quiet=False,
+        )
+
+
+def test_main_check_quiet_mode() -> None:
+    with (
+        patch('sys.argv', ['pystolint', 'check', '/some_file.py', '--quiet']),
+        patch('pystolint.main.check_with_stdout') as mock_check,
+    ):
+        main()
+        mock_check.assert_called_once_with(
+            ['/some_file.py'],
+            base_branch_name_provided=None,
+            diff=False,
+            local_toml_path_provided=None,
+            base_toml_path_provided=None,
+            tools=None,
+            quiet=True,
         )
 
 
@@ -50,6 +70,7 @@ def test_main_with_diff_flag() -> None:
             local_toml_path_provided=None,
             base_toml_path_provided=None,
             tools=None,
+            quiet=False,
         )
 
 
@@ -124,6 +145,7 @@ def test_main_check_mode_with_tools() -> None:
             local_toml_path_provided=None,
             base_toml_path_provided=None,
             tools=['mypy', 'ruff'],
+            quiet=False,
         )
 
 
@@ -137,3 +159,71 @@ def test_main_format_mode_with_tools() -> None:
         mock_format.assert_called_once_with(
             ['/some_file.py'], local_toml_path_provided=None, base_toml_path_provided=None, tools=['ruff']
         )
+
+
+@pytest.fixture
+def note_report_item() -> ReportItem:
+    return ReportItem(
+        file_path='path/to/file.py',
+        line=1,
+        column=1,
+        message='note',
+        code='code',
+        severity=Severity.Note,
+    )
+
+
+@pytest.fixture
+def error_report_item() -> ReportItem:
+    return ReportItem(
+        file_path='path/to/file.py',
+        line=1,
+        column=1,
+        message='error',
+        code='code',
+        severity=Severity.Error,
+    )
+
+
+def test_check_with_stdout_exit_code_notes_only(note_report_item: ReportItem) -> None:
+    with (
+        patch('pystolint.main.check') as mock_check,
+        patch('sys.exit') as mock_exit,
+        patch('sys.stdout', new=StringIO()),
+    ):
+        mock_check.return_value = Report(items=[note_report_item])
+
+        check_with_stdout(
+            ['path/to/file.py'],
+            base_branch_name_provided=None,
+            diff=False,
+            local_toml_path_provided=None,
+            base_toml_path_provided=None,
+            tools=[Tool.MYPY],
+            quiet=False,
+        )
+
+        mock_exit.assert_called_once_with(0)
+
+
+def test_check_with_stdout_exit_code_errors_and_notes(
+    note_report_item: ReportItem, error_report_item: ReportItem
+) -> None:
+    with (
+        patch('pystolint.main.check') as mock_check,
+        patch('sys.exit') as mock_exit,
+        patch('sys.stdout', new=StringIO()),
+    ):
+        mock_check.return_value = Report(items=[note_report_item, error_report_item])
+
+        check_with_stdout(
+            ['path/to/file.py'],
+            base_branch_name_provided=None,
+            diff=False,
+            local_toml_path_provided=None,
+            base_toml_path_provided=None,
+            tools=[Tool.MYPY],
+            quiet=False,
+        )
+
+        mock_exit.assert_called_once_with(1)

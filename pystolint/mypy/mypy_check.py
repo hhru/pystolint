@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from pystolint.dto.report import Report, ReportItem
+from pystolint.dto.report import Report, ReportItem, Severity
 from pystolint.util import execute_command
 from pystolint.util.git import default_base_branch_name, get_git_changed_lines
 
@@ -30,7 +30,8 @@ def run_mypy_check(
             continue
         column = int(item.get('column', '0'))
         rule_code = item.get('code') or ''
-        message = item.get('message') + (f' [{rule_code}]' if rule_code else '')
-        report.items.append(ReportItem(filename, line, column, message))
+        message = item.get('message')
+        severity = item.get('severity', Severity.Error)
+        report.items.append(ReportItem(filename, line, column, message, code=rule_code, severity=severity))
 
     return report

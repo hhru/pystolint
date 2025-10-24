@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pystolint.api import check, reformat
+from pystolint.dto.report import Severity
 from pystolint.tools import CHECK_TOOLS, FORMAT_TOOLS, Tool
 from pystolint.util.git import default_base_branch_name, get_git_changed_files
 from pystolint.util.toml import dump_merged_config
@@ -42,6 +43,7 @@ def check_with_stdout(
     local_toml_path_provided: str | None = None,
     base_toml_path_provided: str | None = None,
     tools: Collection[Tool] | None = None,
+    quiet: bool = False,
 ) -> None:
     report: Report = check(
         paths,
@@ -53,13 +55,37 @@ def check_with_stdout(
     )
 
     for item in report.items:
-        sys.stdout.write(str(item) + '\n')
+        if not quiet or item.severity == Severity.Error:
+            sys.stdout.write(str(item) + '\n')
 
-    if len(report.items) > 0:
-        sys.stdout.write(f'Found {len(report.items)} errors\n')
+    counts_by_severity: dict[Severity, int] = {
+        severity: len([item for item in report.items if item.severity == severity]) for severity in Severity
+    }
+
+    exit_code = 0
+    message_parts = []
+    if counts_by_severity[Severity.Error] > 0:
+        exit_code = 1
+        message_parts.append(f'{counts_by_severity[Severity.Error]} lint errors')
+
+    if len(report.errors) > 0:
+        exit_code = 2
+        message_parts.insert(0, f'{len(report.errors)} run errors')
+
+        sys.stdout.write('Runner errors:\n')
         for error in report.errors:
             sys.stderr.write(error + '\n')
-        sys.exit(1)
+
+    if not quiet and len(report.items) > counts_by_severity[Severity.Error]:
+        # There are more than just errors
+        message_parts.extend([
+            f'{value} lint {key}s' for key, value in counts_by_severity.items() if key != Severity.Error
+        ])
+
+    if len(message_parts) > 0:
+        sys.stdout.write(f'\nFound {", ".join(message_parts)}\n')
+
+    sys.exit(exit_code)
 
 
 def process_paths(paths: list[str], *, base_branch_name_provided: str | None = None, diff: bool = False) -> list[str]:
@@ -102,6 +128,7 @@ def main() -> None:
     # Check mode
     check_parser.add_argument('paths', nargs='*', help='Paths to check')
     check_parser.add_argument('--diff', action='store_true', help='Check only modified files')
+    check_parser.add_argument('--quiet', action='store_true', help='Print only errors')
     check_parser.add_argument('--base_branch_name', help='Base branch for --diff', default=None)
     check_parser.add_argument(
         '--tool',
@@ -168,6 +195,7 @@ def main() -> None:
             local_toml_path_provided=local_toml_path_provided,
             base_toml_path_provided=base_toml_path_provided,
             tools=tools,
+            quiet=args.quiet,
         )
     else:
         sys.stderr.write(f'Unexpected command args {sys.argv}\n')

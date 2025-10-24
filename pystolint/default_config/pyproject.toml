@@ -82,6 +82,7 @@ disallow_any_generics = true
 disallow_subclassing_any = true
 warn_return_any = true
 disallow_any_explicit = true
+report_deprecated_as_note = true
 enable_error_code = ['deprecated']
 # after up python to 3.13+ plugin will be removed
 # https://mypy.readthedocs.io/en/stable/changelog.html#support-for-deprecated-decorator-pep-702

@@ -46,7 +46,7 @@ def run_ruff_check(
         ):
             continue
         column = int(item.get('location', {}).get('column', '0'))
-        message = rule_code + (': ' if rule_code else '') + item.get('message')
-        report.items.append(ReportItem(filename, line, column, message))
+        message = item.get('message')
+        report.items.append(ReportItem(filename, line, column, message, code=rule_code))
 
     return report

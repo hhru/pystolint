@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from pystolint.dto.report import Severity
 from pystolint.mypy.mypy_check import run_mypy_check
 from pystolint.util.git import default_base_branch_name
 
@@ -86,3 +87,23 @@ def test_run_mypy_check_with_diff_mode(mypy_config: str, type_error_file: str, m
     # We should only get errors from the "changed" lines
     assert all(r.line in {2, 4} for r in result.items)
     assert len(result.items) == 2
+
+
+def test_run_mypy_severity(mypy_config: str) -> None:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        file_path = Path(tmpdir) / 'test_run_mypy_severity.py'
+        file_content = (
+            'from typing_extensions import reveal_type\n'
+            'def test() -> None:\n'
+            '    a: int = "string"\n'
+            '    reveal_type(a)\n'
+        )
+        file_path.write_text(file_content)
+
+        result = run_mypy_check(mypy_config, [str(file_path)])
+        assert len(result.items) == 2
+        assert result.items[0].severity == Severity.Error
+        assert 'Incompatible types' in result.items[0].message
+
+        assert result.items[1].severity == Severity.Note
+        assert 'Revealed type is' in result.items[1].message
