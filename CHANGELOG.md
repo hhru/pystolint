@@ -1,3 +1,7 @@
+# 0.4.0
+
+Added `disallow_any_explicit = true` to mypy config (in exchange of removed ANN401)
+
 # 0.3.0
 
 * `--diff` mode now considers excluded files

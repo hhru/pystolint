@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, TypedDict
 
 import pytest
 
@@ -10,8 +10,14 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
+class TmpStructureDict(TypedDict):
+    root: Path
+    dirs: dict[str, Path]
+    files: dict[str, Path]
+
+
 @pytest.fixture
-def tmp_structure(tmp_path: Path) -> dict[str, Any]:
+def tmp_structure(tmp_path: Path) -> TmpStructureDict:
     (tmp_path / 'dir_with_py').mkdir()
     (tmp_path / 'dir_with_py' / 'file1.py').write_text('print("x")')
     (tmp_path / 'dir_empty').mkdir()
@@ -33,7 +39,7 @@ def tmp_structure(tmp_path: Path) -> dict[str, Any]:
     }
 
 
-def test_filter_py_files_includes_py_files(tmp_structure: dict[str, Any]) -> None:
+def test_filter_py_files_includes_py_files(tmp_structure: TmpStructureDict) -> None:
     paths = [
         str(tmp_structure['files']['py']),
         str(tmp_structure['files']['non_py']),
