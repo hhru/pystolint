@@ -1,3 +1,9 @@
+# 0.5.0
+
+* Default mypy config includes `report_deprecated_as_note=true`
+* Notes from mypy output are not treated as errors. If only notes are reported, exit code = 0
+* Add `--quiet` argument which suppresses notes from output
+
 # 0.4.0
 
 Added `disallow_any_explicit = true` to mypy config (in exchange of removed ANN401)
