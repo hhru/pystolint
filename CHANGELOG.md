@@ -1,8 +1,13 @@
+# 0.6.0
+
+- Add pydantic-mypy to merge config mypy
+- Add pydantic-mypy settings to default config
+
 # 0.5.0
 
-* Default mypy config includes `report_deprecated_as_note=true`
-* Notes from mypy output are not treated as errors. If only notes are reported, exit code = 0
-* Add `--quiet` argument which suppresses notes from output
+- Default mypy config includes `report_deprecated_as_note=true`
+- Notes from mypy output are not treated as errors. If only notes are reported, exit code = 0
+- Add `--quiet` argument which suppresses notes from output
 
 # 0.4.0
 
@@ -10,9 +15,9 @@ Added `disallow_any_explicit = true` to mypy config (in exchange of removed ANN4
 
 # 0.3.0
 
-* `--diff` mode now considers excluded files
-* Default ruff config now ignores ANN* errors
-* Default ruff config now ignores PLR0914 (too many local variables)
+- `--diff` mode now considers excluded files
+- Default ruff config now ignores ANN\* errors
+- Default ruff config now ignores PLR0914 (too many local variables)
 
 # 0.2.19
 

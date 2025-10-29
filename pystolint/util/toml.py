@@ -113,7 +113,8 @@ def dump_merged_config(
         tomli_w.dump(ruff_config, f)
 
     mypy_config = merged_config.get('mypy', {})
-    mypy_config = {'tool': {'mypy': mypy_config}}
+    pydantic_mypy_config = merged_config.get('pydantic-mypy', {})
+    mypy_config = {'tool': {'mypy': mypy_config, 'pydantic-mypy': pydantic_mypy_config}}
     with Path(dest_path + '.mypy.toml').open('wb') as f:
         tomli_w.dump(mypy_config, f)
 
