@@ -87,3 +87,7 @@ enable_error_code = ['deprecated']
 # after up python to 3.13+ plugin will be removed
 # https://mypy.readthedocs.io/en/stable/changelog.html#support-for-deprecated-decorator-pep-702
 plugins = 'pystolint.mypy.deprecated_plugin'
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
