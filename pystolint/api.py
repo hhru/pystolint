@@ -17,6 +17,8 @@ from pystolint.util.toml import get_merged_config
 if TYPE_CHECKING:
     from collections.abc import Collection
 
+MYPY_CONFIG_KEYS = ['mypy', 'pydantic-mypy']
+
 
 def reformat(
     paths: list[str],
@@ -88,7 +90,9 @@ def check(
 
         if len(mypy_paths) > 0:
             with tempfile.NamedTemporaryFile(mode='w', suffix='.toml') as tmp_config:
-                toml_str = tomli_w.dumps({'tool': {'mypy': mypy_config}})
+                toml_str = tomli_w.dumps({
+                    'tool': {key: merged_config.get(key) for key in MYPY_CONFIG_KEYS if key in merged_config}
+                })
                 tmp_config.write(toml_str)
                 tmp_config.flush()
                 tmp_config_path = tmp_config.name

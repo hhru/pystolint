@@ -51,19 +51,29 @@ chmod +x /usr/local/bin/pys
 
 ## Usage
 
-Check code:
+### Check code:
 ```bash
 pys check .
 pys check path1 path2
 pys check --diff
 ```
 
-Format code:
+### Format code:
 
 ```bash
 pys format .
 pys format path1 path2
 ```
+
+### Tools
+
+You can use specific tool for checking/formatting:
+```bash
+pys check --tool mypy .
+```
+This will run mypy only. **Be aware that mypy requires pydantic as a project dependency by default.**
+You can disable this requirement by editing tool.mypy.plugins in pyproject.toml or add extra 'pydantic' to pystolint 
+dependency.
 
 
 ## Settings
