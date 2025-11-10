@@ -91,9 +91,7 @@ def check(
         if len(mypy_paths) > 0:
             with tempfile.NamedTemporaryFile(mode='w', suffix='.toml') as tmp_config:
                 toml_str = tomli_w.dumps({
-                    'tool': {
-                        key: merged_config.get(key) for key in MYPY_CONFIG_KEYS if key in merged_config
-                    }
+                    'tool': {key: merged_config.get(key) for key in MYPY_CONFIG_KEYS if key in merged_config}
                 })
                 tmp_config.write(toml_str)
                 tmp_config.flush()
