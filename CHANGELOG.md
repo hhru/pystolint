@@ -1,3 +1,7 @@
+# 0.6.1
+
+- Fixed temporary config generation for mypy
+
 # 0.6.0
 
 - Add pydantic-mypy to merge config mypy
