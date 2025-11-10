@@ -72,7 +72,8 @@ You can use specific tool for checking/formatting:
 pys check --tool mypy .
 ```
 This will run mypy only. **Be aware that mypy requires pydantic as a project dependency by default.**
-You can disable this requirement by editing tool.mypy.plugins in pyproject.toml
+You can disable this requirement by editing tool.mypy.plugins in pyproject.toml or add extra 'pydantic' to pystolint 
+dependency.
 
 
 ## Settings
